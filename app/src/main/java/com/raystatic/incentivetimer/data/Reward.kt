@@ -1,9 +1,13 @@
 package com.raystatic.incentivetimer.data
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
+@Entity(tableName = "rewards")
 data class Reward(
-    val icon:ImageVector,
+    val icon:String,
     val title: String,
-    val chanceInPercent:Int
+    val chanceInPercent:Int,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0
 )

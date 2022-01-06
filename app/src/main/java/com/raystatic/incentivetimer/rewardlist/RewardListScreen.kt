@@ -1,11 +1,8 @@
 package com.raystatic.incentivetimer.rewardlist
 
-import android.content.res.Configuration.UI_MODE_NIGHT_NO
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,16 +11,13 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,14 +25,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.raystatic.incentivetimer.R
 import com.raystatic.incentivetimer.data.Reward
+import com.raystatic.incentivetimer.ui.IconKeys
 import com.raystatic.incentivetimer.ui.ListBottomPadding
-import com.raystatic.incentivetimer.ui.theme.IncentiveTimerTheme
-import kotlinx.coroutines.coroutineScope
+import com.raystatic.incentivetimer.ui.defaultIcon
+import com.raystatic.incentivetimer.ui.rewardIcons
 import kotlinx.coroutines.launch
 
 @Composable
 fun RewardListScreen(viewModel: RewardListViewModel = hiltViewModel()) {
-    val dummyRecords by viewModel.dummyRecords.observeAsState(listOf())
+    val dummyRecords by viewModel.rewards.observeAsState(listOf())
     ScreenContent(dummyRecords)
 }
 
@@ -78,7 +73,8 @@ private fun ScreenContent(
                     end = 8.dp,
                     bottom = ListBottomPadding
                 ),
-                state = listState
+                state = listState,
+                modifier = Modifier.fillMaxSize()
             ) {
                 items(rewards) { reward ->
                     RewardItem(reward = reward)
@@ -128,7 +124,8 @@ private fun RewardItem(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(reward.icon,contentDescription = null, modifier = Modifier
+            Icon(imageVector = rewardIcons[reward.icon] ?: defaultIcon,
+                contentDescription = null, modifier = Modifier
                 .padding(8.dp)
                 .size(64.dp)
                 .fillMaxWidth())
@@ -136,10 +133,9 @@ private fun RewardItem(
                 Text(
                     text = reward.title,
                     fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.h6,
                 )
                 Text(
-                    text = "${reward.chanceInPercent}%",
+                    text = "${stringResource(id = R.string.chance)}:${reward.chanceInPercent}%",
                     style = MaterialTheme.typography.body2,
                     modifier = Modifier.fillMaxWidth(),
                     color = Color.Gray
@@ -156,9 +152,9 @@ private fun ScreenContentPreview() {
     Surface {
         ScreenContent(
             listOf(
-                Reward(icon = Icons.Default.Star, title = "Reward 1",5),
-                Reward(icon = Icons.Default.Star, title = "Reward 2",5),
-                Reward(icon = Icons.Default.Star, title = "Reward 3",5)
+                Reward(icon = IconKeys.CAKE, title = "Reward 1",5),
+                Reward(icon = IconKeys.BATH_TUB, title = "Reward 2",5),
+                Reward(icon = IconKeys.TV, title = "Reward 3",5)
             )
         )
     }

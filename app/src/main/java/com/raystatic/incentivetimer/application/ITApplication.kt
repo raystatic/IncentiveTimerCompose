@@ -1,4 +1,4 @@
-package com.raystatic.incentivetimer
+package com.raystatic.incentivetimer.application
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
