@@ -23,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.raystatic.incentivetimer.FullScreenDestinations
 import com.raystatic.incentivetimer.R
 import com.raystatic.incentivetimer.data.Reward
 import com.raystatic.incentivetimer.ui.IconKeys
@@ -32,14 +34,23 @@ import com.raystatic.incentivetimer.ui.rewardIcons
 import kotlinx.coroutines.launch
 
 @Composable
-fun RewardListScreen(viewModel: RewardListViewModel = hiltViewModel()) {
+fun RewardListScreen(
+    navController: NavController,
+    viewModel: RewardListViewModel = hiltViewModel()
+) {
     val dummyRecords by viewModel.rewards.observeAsState(listOf())
-    ScreenContent(dummyRecords)
+    ScreenContent(
+        rewards = dummyRecords,
+        onAddRewardClicked = {
+            navController.navigate(FullScreenDestinations.AddEditRewardScreen.route)
+        }
+    )
 }
 
 @Composable
 private fun ScreenContent(
-    rewards:List<Reward>
+    rewards:List<Reward>,
+    onAddRewardClicked: () -> Unit
 ) {
 
     Scaffold(
@@ -50,7 +61,7 @@ private fun ScreenContent(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /*TODO*/ },
+                onClick = onAddRewardClicked,
                 modifier = Modifier.padding(16.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_new_reward))
@@ -155,7 +166,8 @@ private fun ScreenContentPreview() {
                 Reward(icon = IconKeys.CAKE, title = "Reward 1",5),
                 Reward(icon = IconKeys.BATH_TUB, title = "Reward 2",5),
                 Reward(icon = IconKeys.TV, title = "Reward 3",5)
-            )
+            ),
+            onAddRewardClicked = {}
         )
     }
 }

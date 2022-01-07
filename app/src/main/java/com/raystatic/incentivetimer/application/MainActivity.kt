@@ -1,7 +1,5 @@
 package com.raystatic.incentivetimer
 
-import android.content.res.Configuration
-import android.graphics.drawable.Icon
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,23 +7,20 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Timer
-import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.raystatic.incentivetimer.addeditreward.AddEditRewardScreen
 import com.raystatic.incentivetimer.rewardlist.RewardListScreen
 import com.raystatic.incentivetimer.timer.TimerScreen
 import com.raystatic.incentivetimer.ui.theme.IncentiveTimerTheme
@@ -78,20 +73,25 @@ private fun ScreenContent() {
             }
         }
     ) {innerPadding->
-        NavHost(navController, startDestination = BottomNavDestination.Timer.route, Modifier.padding(innerPadding)){
-            composable(BottomNavDestination.Timer.route){
-                TimerScreen()
+        NavHost(navController, startDestination = BottomNavDestination.TimerScreen.route, Modifier.padding(innerPadding)){
+            composable(BottomNavDestination.TimerScreen.route){
+                TimerScreen(navController)
             }
-            composable(BottomNavDestination.RewardList.route){
-                RewardListScreen()
+            composable(BottomNavDestination.RewardListScreen.route){
+                RewardListScreen(
+                    navController = navController
+                )
+            }
+            composable(FullScreenDestinations.AddEditRewardScreen.route){
+                AddEditRewardScreen(navController)
             }
         }
     }
 }
 
 val bottomNavDestinations = listOf(
-    BottomNavDestination.Timer,
-    BottomNavDestination.RewardList
+    BottomNavDestination.TimerScreen,
+    BottomNavDestination.RewardListScreen
 )
 
 sealed class BottomNavDestination(
@@ -99,8 +99,16 @@ sealed class BottomNavDestination(
     val icon:ImageVector,
     @StringRes val label:Int
 ){
-    object Timer:BottomNavDestination(route = "timer",icon = Icons.Outlined.Timer,label =R.string.timer)
-    object RewardList:BottomNavDestination(route = "rewardList",icon = Icons.Outlined.List,label =R.string.reward_list)
+    object TimerScreen:BottomNavDestination(route = "timer",icon = Icons.Outlined.Timer,label =R.string.timer)
+    object RewardListScreen:BottomNavDestination(route = "reward_list",icon = Icons.Outlined.List,label =R.string.reward_list)
+
+}
+
+sealed class FullScreenDestinations(
+    val route:String
+){
+
+    object AddEditRewardScreen: FullScreenDestinations(route = "add_edit_reward")
 
 }
 

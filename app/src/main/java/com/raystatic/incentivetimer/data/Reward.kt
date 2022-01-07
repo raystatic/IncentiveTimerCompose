@@ -9,5 +9,6 @@ data class Reward(
     val icon:String,
     val title: String,
     val chanceInPercent:Int,
+    val isUnlocked: Boolean = false,
     @PrimaryKey(autoGenerate = true) val id: Long = 0
 )
