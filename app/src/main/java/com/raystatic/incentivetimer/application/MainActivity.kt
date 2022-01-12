@@ -20,10 +20,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.raystatic.incentivetimer.addeditreward.AddEditRewardScreen
-import com.raystatic.incentivetimer.rewardlist.RewardListScreen
-import com.raystatic.incentivetimer.timer.TimerScreen
-import com.raystatic.incentivetimer.ui.theme.IncentiveTimerTheme
+import androidx.navigation.navArgument
+import com.raystatic.incentivetimer.features.addeditreward.AddEditRewardScreen
+import com.raystatic.incentivetimer.features.rewardlist.RewardListScreen
+import com.raystatic.incentivetimer.features.timer.TimerScreen
+import com.raystatic.incentivetimer.core.ui.theme.IncentiveTimerTheme
+import com.raystatic.incentivetimer.features.addeditreward.ARG_REWARD_ID
+import com.raystatic.incentivetimer.features.addeditreward.NO_REWARD_ID
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -74,15 +77,20 @@ private fun ScreenContent() {
         }
     ) {innerPadding->
         NavHost(navController, startDestination = BottomNavDestination.TimerScreen.route, Modifier.padding(innerPadding)){
-            composable(BottomNavDestination.TimerScreen.route){
+            composable(route = BottomNavDestination.TimerScreen.route){
                 TimerScreen(navController)
             }
-            composable(BottomNavDestination.RewardListScreen.route){
+            composable(route = BottomNavDestination.RewardListScreen.route){
                 RewardListScreen(
                     navController = navController
                 )
             }
-            composable(FullScreenDestinations.AddEditRewardScreen.route){
+            composable(
+                route = FullScreenDestinations.AddEditRewardScreen.route + "?$ARG_REWARD_ID={$ARG_REWARD_ID}",
+                arguments = listOf(navArgument(ARG_REWARD_ID){
+                    defaultValue = NO_REWARD_ID
+                })
+            ){
                 AddEditRewardScreen(navController)
             }
         }

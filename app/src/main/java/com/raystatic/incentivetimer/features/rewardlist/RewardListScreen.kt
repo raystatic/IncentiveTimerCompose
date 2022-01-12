@@ -1,4 +1,4 @@
-package com.raystatic.incentivetimer.rewardlist
+package com.raystatic.incentivetimer.features.rewardlist
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -27,10 +27,9 @@ import androidx.navigation.NavController
 import com.raystatic.incentivetimer.FullScreenDestinations
 import com.raystatic.incentivetimer.R
 import com.raystatic.incentivetimer.data.Reward
-import com.raystatic.incentivetimer.ui.IconKeys
-import com.raystatic.incentivetimer.ui.ListBottomPadding
-import com.raystatic.incentivetimer.ui.defaultIcon
-import com.raystatic.incentivetimer.ui.rewardIcons
+import com.raystatic.incentivetimer.core.ui.IconKey
+import com.raystatic.incentivetimer.core.ui.ListBottomPadding
+import com.raystatic.incentivetimer.features.addeditreward.ARG_REWARD_ID
 import kotlinx.coroutines.launch
 
 @Composable
@@ -43,6 +42,9 @@ fun RewardListScreen(
         rewards = dummyRecords,
         onAddRewardClicked = {
             navController.navigate(FullScreenDestinations.AddEditRewardScreen.route)
+        },
+        onRewardItemClicked = {id->
+            navController.navigate(FullScreenDestinations.AddEditRewardScreen.route+"?$ARG_REWARD_ID=${id}")
         }
     )
 }
@@ -50,7 +52,8 @@ fun RewardListScreen(
 @Composable
 private fun ScreenContent(
     rewards:List<Reward>,
-    onAddRewardClicked: () -> Unit
+    onAddRewardClicked: () -> Unit,
+    onRewardItemClicked: (Long) -> Unit
 ) {
 
     Scaffold(
@@ -88,7 +91,10 @@ private fun ScreenContent(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(rewards) { reward ->
-                    RewardItem(reward = reward)
+                    RewardItem(
+                        reward = reward,
+                        onRewardItemClicked = onRewardItemClicked
+                    )
                 }
             }
             AnimatedVisibility (
@@ -122,11 +128,12 @@ private fun ScreenContent(
 @Composable
 private fun RewardItem(
     reward: Reward,
+    onRewardItemClicked:(Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         onClick ={
-
+            onRewardItemClicked(reward.id)
         },
         modifier = modifier
             .fillMaxWidth()
@@ -135,7 +142,7 @@ private fun RewardItem(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(imageVector = rewardIcons[reward.icon] ?: defaultIcon,
+            Icon(imageVector = reward.icon.rewardIcon,
                 contentDescription = null, modifier = Modifier
                 .padding(8.dp)
                 .size(64.dp)
@@ -163,11 +170,12 @@ private fun ScreenContentPreview() {
     Surface {
         ScreenContent(
             listOf(
-                Reward(icon = IconKeys.CAKE, title = "Reward 1",5),
-                Reward(icon = IconKeys.BATH_TUB, title = "Reward 2",5),
-                Reward(icon = IconKeys.TV, title = "Reward 3",5)
+                Reward(icon = IconKey.CAKE, title = "Reward 1",5),
+                Reward(icon = IconKey.BATH_TUB, title = "Reward 2",5),
+                Reward(icon = IconKey.TV, title = "Reward 3",5)
             ),
-            onAddRewardClicked = {}
+            onAddRewardClicked = {},
+            onRewardItemClicked = {}
         )
     }
 }

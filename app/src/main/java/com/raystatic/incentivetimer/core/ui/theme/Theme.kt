@@ -1,4 +1,4 @@
-package com.raystatic.incentivetimer.ui.theme
+package com.raystatic.incentivetimer.core.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme

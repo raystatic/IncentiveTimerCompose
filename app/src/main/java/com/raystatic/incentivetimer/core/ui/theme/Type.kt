@@ -1,4 +1,4 @@
-package com.raystatic.incentivetimer.ui.theme
+package com.raystatic.incentivetimer.core.ui.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle

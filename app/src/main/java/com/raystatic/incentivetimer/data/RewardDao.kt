@@ -1,9 +1,6 @@
 package com.raystatic.incentivetimer.data
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -12,7 +9,14 @@ interface RewardDao {
     @Query("SELECT * FROM rewards")
     fun getAllRewards() : Flow<List<Reward>>
 
+    @Query("SELECT * FROM rewards WHERE id=:rewardId")
+    suspend fun getRewardById(rewardId:Long):Reward
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReward(reward: Reward)
+
+    @Update
+    suspend fun upadateReward(reward: Reward)
+
 
 }
