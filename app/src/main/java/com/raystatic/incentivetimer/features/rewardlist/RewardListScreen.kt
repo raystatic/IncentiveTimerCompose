@@ -12,12 +12,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,7 +31,10 @@ import com.raystatic.incentivetimer.R
 import com.raystatic.incentivetimer.data.Reward
 import com.raystatic.incentivetimer.core.ui.IconKey
 import com.raystatic.incentivetimer.core.ui.ListBottomPadding
+import com.raystatic.incentivetimer.features.addeditreward.ADD_EDIT_REWARD_RESULT
 import com.raystatic.incentivetimer.features.addeditreward.ARG_REWARD_ID
+import com.raystatic.incentivetimer.features.addeditreward.RESULT_REWARD_ADDED
+import com.raystatic.incentivetimer.features.addeditreward.RESULT_REWARD_UPDATED
 import kotlinx.coroutines.launch
 
 @Composable
@@ -37,15 +42,44 @@ fun RewardListScreen(
     navController: NavController,
     viewModel: RewardListViewModel = hiltViewModel()
 ) {
-    val dummyRecords by viewModel.rewards.observeAsState(listOf())
+    val rewards by viewModel.rewards.observeAsState(listOf())
+
+    val addEditRewardResult = navController.currentBackStackEntry
+        ?.savedStateHandle?.getLiveData<String>(ADD_EDIT_REWARD_RESULT)
+        ?.observeAsState()
+
+
+    val scaffoldState = rememberScaffoldState()
+
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = addEditRewardResult){
+        navController.currentBackStackEntry?.savedStateHandle?.remove<String>(
+            ADD_EDIT_REWARD_RESULT
+        )
+        addEditRewardResult?.value?.let {
+            when(it){
+                RESULT_REWARD_ADDED -> {
+                    scaffoldState.snackbarHostState.showSnackbar(context.getString(R.string.reward_added))
+                }
+
+                RESULT_REWARD_UPDATED -> {
+                    scaffoldState.snackbarHostState.showSnackbar(context.getString(R.string.reward_updated))
+                }
+            }
+
+        }
+    }
+
     ScreenContent(
-        rewards = dummyRecords,
+        rewards = rewards,
         onAddRewardClicked = {
             navController.navigate(FullScreenDestinations.AddEditRewardScreen.route)
         },
         onRewardItemClicked = {id->
             navController.navigate(FullScreenDestinations.AddEditRewardScreen.route+"?$ARG_REWARD_ID=${id}")
-        }
+        },
+        scaffoldState = scaffoldState
     )
 }
 
@@ -53,7 +87,8 @@ fun RewardListScreen(
 private fun ScreenContent(
     rewards:List<Reward>,
     onAddRewardClicked: () -> Unit,
-    onRewardItemClicked: (Long) -> Unit
+    onRewardItemClicked: (Long) -> Unit,
+    scaffoldState: ScaffoldState = rememberScaffoldState()
 ) {
 
     Scaffold(
@@ -69,7 +104,8 @@ private fun ScreenContent(
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_new_reward))
             }
-        }
+        },
+        scaffoldState = scaffoldState
     ) {
 
         val listState = rememberLazyListState()
@@ -144,9 +180,9 @@ private fun RewardItem(
         ) {
             Icon(imageVector = reward.icon.rewardIcon,
                 contentDescription = null, modifier = Modifier
-                .padding(8.dp)
-                .size(64.dp)
-                .fillMaxWidth())
+                    .padding(8.dp)
+                    .size(64.dp)
+                    .fillMaxWidth())
             Column {
                 Text(
                     text = reward.title,
@@ -175,7 +211,7 @@ private fun ScreenContentPreview() {
                 Reward(icon = IconKey.TV, title = "Reward 3",5)
             ),
             onAddRewardClicked = {},
-            onRewardItemClicked = {}
+            onRewardItemClicked = {},
         )
     }
 }

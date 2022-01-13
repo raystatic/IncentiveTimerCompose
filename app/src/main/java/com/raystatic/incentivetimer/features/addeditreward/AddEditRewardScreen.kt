@@ -53,9 +53,15 @@ fun AddEditRewardScreen(
 
            when(event){
                AddEditRewardViewModel.AddEditRewardEvent.RewardCreated -> {
+                   navController.previousBackStackEntry?.savedStateHandle?.set(
+                       ADD_EDIT_REWARD_RESULT, RESULT_REWARD_ADDED
+                   )
                    navController.popBackStack()
                }
                AddEditRewardViewModel.AddEditRewardEvent.RewardUpdated -> {
+                   navController.previousBackStackEntry?.savedStateHandle?.set(
+                       ADD_EDIT_REWARD_RESULT, RESULT_REWARD_UPDATED
+                   )
                    navController.popBackStack()  
                }
            }.exhaustive

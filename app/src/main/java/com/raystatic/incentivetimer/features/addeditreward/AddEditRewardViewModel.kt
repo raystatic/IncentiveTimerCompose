@@ -33,10 +33,19 @@ class AddEditRewardViewModel @Inject constructor(
 
     val isEditMode = rewardId != NO_REWARD_ID
 
-    private fun populateInputWithDefaultValues() {
-        rewardNameLiveData.value = ""
-        chanceInPercentInputLiveData.value = 10
-        rewardIconSelectionLiveData.value = defaultRrewardIcon
+    private fun populateEmptyInputWithDefaults() {
+
+        if (rewardNameLiveData.value == null){
+            rewardNameLiveData.value = ""
+        }
+
+        if (chanceInPercentInputLiveData.value == null){
+            chanceInPercentInputLiveData.value = 10
+        }
+
+        if (rewardIconSelectionLiveData.value == null){
+            rewardIconSelectionLiveData.value = defaultRrewardIcon
+        }
     }
 
     private fun populateEmptyInputValuesWithRewardData() {
@@ -78,7 +87,7 @@ class AddEditRewardViewModel @Inject constructor(
                 populateEmptyInputValuesWithRewardData()
             }
         }else{
-            populateInputWithDefaultValues()
+            populateEmptyInputWithDefaults()
         }
     }
 
@@ -147,3 +156,7 @@ class AddEditRewardViewModel @Inject constructor(
 
 const val ARG_REWARD_ID = "rewardId"
 const val NO_REWARD_ID = -1L
+
+const val ADD_EDIT_REWARD_RESULT = "ADD_EDIT_REWARD_RESULT"
+const val RESULT_REWARD_ADDED = "RESULT_REWARD_ADDED"
+const val RESULT_REWARD_UPDATED = "RESULT_REWARD_UPDATED"
