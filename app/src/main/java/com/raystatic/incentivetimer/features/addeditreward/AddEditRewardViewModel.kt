@@ -1,9 +1,6 @@
 package com.raystatic.incentivetimer.features.addeditreward
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.raystatic.incentivetimer.data.Reward
 import com.raystatic.incentivetimer.data.RewardDao
 import com.raystatic.incentivetimer.core.ui.IconKey
@@ -20,6 +17,10 @@ class AddEditRewardViewModel @Inject constructor(
     private val rewardDao: RewardDao
 ): ViewModel(), AddEditRewardActions {
 
+    private object SavedStateHandleKeys{
+        const val KEY_REWARD_LIVE_DATA = "KEY_REWARD_LIVE_DATA"
+    }
+
     sealed class AddEditRewardEvent{
         object RewardCreated: AddEditRewardEvent()
         object RewardUpdated: AddEditRewardEvent()
@@ -30,53 +31,24 @@ class AddEditRewardViewModel @Inject constructor(
     val events = eventChannel.receiveAsFlow()
 
     private val rewardId = savedStateHandle.get<Long>(ARG_REWARD_ID)
-    private var reward:Reward?=null
+    private val rewardLiveData = savedStateHandle.getLiveData<Reward>(SavedStateHandleKeys.KEY_REWARD_LIVE_DATA)
 
     val isEditMode = rewardId != NO_REWARD_ID
 
-    private fun populateEmptyInputWithDefaults() {
-
-        if (rewardNameLiveData.value == null){
-            rewardNameLiveData.value = ""
-        }
-
-        if (chanceInPercentInputLiveData.value == null){
-            chanceInPercentInputLiveData.value = 10
-        }
-
-        if (rewardIconSelectionLiveData.value == null){
-            rewardIconSelectionLiveData.value = defaultRrewardIcon
-        }
+    val rewardNameInput:LiveData<String> = rewardLiveData.map {
+        it.title
     }
-
-    private fun populateEmptyInputValuesWithRewardData() {
-        val reward = this.reward
-        if (reward!=null){
-            if (rewardNameLiveData.value == null){
-                rewardNameLiveData.value = reward.title
-            }
-            
-            if (chanceInPercentInputLiveData.value == null){
-                chanceInPercentInputLiveData.value = reward.chanceInPercent
-            }
-            
-            if (rewardIconSelectionLiveData.value == null){
-                rewardIconSelectionLiveData.value = reward.icon
-            }
-        }
-    }
-
-    private val rewardNameLiveData = savedStateHandle.getLiveData<String>("rewardNameLiveData")
-    val rewardNameInput:LiveData<String> = rewardNameLiveData
 
     private val rewardNameInputIsErrorLiveData = savedStateHandle.getLiveData<Boolean>("rewardNameInputIsErrorLiveData", false)
     val rewardNameInputIsError:LiveData<Boolean> = rewardNameInputIsErrorLiveData
 
-    private val chanceInPercentInputLiveData = savedStateHandle.getLiveData<Int>("chanceInPercentLiveData")
-    val chanceInPercentInput :LiveData<Int> = chanceInPercentInputLiveData
+    val chanceInPercentInput :LiveData<Int> = rewardLiveData.map {
+        it.chanceInPercent
+    }
 
-    private val rewardIconSelectionLiveData = savedStateHandle.getLiveData<IconKey>("rewardIconSelectionLiveData")
-    val rewardIconSelection:LiveData<IconKey> = rewardIconSelectionLiveData
+    val rewardIconSelection:LiveData<IconKey> = rewardLiveData.map {
+        it.icon
+    }
 
     private val showRewardIconSelectionDialogLiveData = savedStateHandle.getLiveData<Boolean>("showRewardIconSelectionDialogLiveData",false)
     val showRewardIconSelectionDialog:LiveData<Boolean> = showRewardIconSelectionDialogLiveData
@@ -85,22 +57,24 @@ class AddEditRewardViewModel @Inject constructor(
     val showDeleteRewardConfirmationDialog: LiveData<Boolean> = showDeleteRewardConfirmationDialogLiveData
 
     init {
-        if (rewardId != null && rewardId != NO_REWARD_ID){
-            viewModelScope.launch {
-                reward = rewardDao.getRewardById(rewardId)
-                populateEmptyInputValuesWithRewardData()
+
+        if (!savedStateHandle.contains(SavedStateHandleKeys.KEY_REWARD_LIVE_DATA )){
+            if (rewardId != null && isEditMode){
+                viewModelScope.launch {
+                    rewardLiveData.value = rewardDao.getRewardById(rewardId)
+                }
+            }else{
+                rewardLiveData.value = Reward(icon = defaultRrewardIcon,title = "",chanceInPercent = 10)
             }
-        }else{
-            populateEmptyInputWithDefaults()
         }
     }
 
     override fun onRewardNameInputChanged(input:String){
-        rewardNameLiveData.value = input
+        rewardLiveData.value = rewardLiveData.value?.copy(title = input)
     }
 
     override fun onChanceInPercentInputChanged(input:Int){
-        chanceInPercentInputLiveData.value = input
+        rewardLiveData.value = rewardLiveData.value?.copy(chanceInPercent = input)
     }
 
     override fun onRewardIconButtonClicked(){
@@ -108,7 +82,7 @@ class AddEditRewardViewModel @Inject constructor(
     }
 
     override fun onRewardIconSelected(iconKey: IconKey){
-        rewardIconSelectionLiveData.value = iconKey
+        rewardLiveData.value = rewardLiveData.value?.copy(icon = iconKey)
     }
 
     override fun onRewardIconDialogDismissRequest(){
@@ -116,30 +90,18 @@ class AddEditRewardViewModel @Inject constructor(
     }
 
     override fun onSaveClicked(){
-        val rewardNameInput = rewardNameInput.value
-        val chanceInPercentInput = chanceInPercentInput.value
-        val rewardIconKeySelection = rewardIconSelection.value
-
+        val reward = rewardLiveData.value ?: return
         rewardNameInputIsErrorLiveData.value = false
 
         viewModelScope.launch {
-            if (!rewardNameInput.isNullOrBlank() && chanceInPercentInput!= null && rewardIconKeySelection != null){
-                val reward = reward
-                if (reward != null){
-                    updateReward(reward.copy(title = rewardNameInput,chanceInPercent = chanceInPercentInput,icon = rewardIconKeySelection))
+            if (reward.title.isNotBlank()){
+                if (isEditMode){
+                    updateReward(reward)
                 }else{
-                    createReward(
-                        Reward(
-                            icon =  rewardIconKeySelection,
-                            title = rewardNameInput,
-                            chanceInPercent = chanceInPercentInput
-                        )
-                    )
+                    createReward(reward)
                 }
             }else{
-                if (rewardNameInput.isNullOrBlank()){
-                    rewardNameInputIsErrorLiveData.value = true
-                }
+                rewardNameInputIsErrorLiveData.value = true
             }
         }
 
@@ -152,7 +114,7 @@ class AddEditRewardViewModel @Inject constructor(
     override fun onDeleteRewardConfirmed() {
         showDeleteRewardConfirmationDialogLiveData.value = false
         viewModelScope.launch {
-            val reward =  reward
+            val reward =  rewardLiveData.value
             if (reward!=null){
                 rewardDao.deleteReward(reward)
                 eventChannel.send(AddEditRewardEvent.RewardDeleted)
