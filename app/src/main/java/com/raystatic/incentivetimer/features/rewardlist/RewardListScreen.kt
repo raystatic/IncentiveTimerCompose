@@ -31,10 +31,7 @@ import com.raystatic.incentivetimer.R
 import com.raystatic.incentivetimer.data.Reward
 import com.raystatic.incentivetimer.core.ui.IconKey
 import com.raystatic.incentivetimer.core.ui.ListBottomPadding
-import com.raystatic.incentivetimer.features.addeditreward.ADD_EDIT_REWARD_RESULT
-import com.raystatic.incentivetimer.features.addeditreward.ARG_REWARD_ID
-import com.raystatic.incentivetimer.features.addeditreward.RESULT_REWARD_ADDED
-import com.raystatic.incentivetimer.features.addeditreward.RESULT_REWARD_UPDATED
+import com.raystatic.incentivetimer.features.addeditreward.*
 import kotlinx.coroutines.launch
 
 @Composable
@@ -65,6 +62,10 @@ fun RewardListScreen(
 
                 RESULT_REWARD_UPDATED -> {
                     scaffoldState.snackbarHostState.showSnackbar(context.getString(R.string.reward_updated))
+                }
+
+                RESULT_REWARD_DELETED -> {
+                    scaffoldState.snackbarHostState.showSnackbar(context.getString(R.string.reward_deleted))
                 }
             }
 

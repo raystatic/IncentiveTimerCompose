@@ -23,6 +23,7 @@ class AddEditRewardViewModel @Inject constructor(
     sealed class AddEditRewardEvent{
         object RewardCreated: AddEditRewardEvent()
         object RewardUpdated: AddEditRewardEvent()
+        object RewardDeleted: AddEditRewardEvent()
     }
 
     private val eventChannel = Channel<AddEditRewardEvent>()
@@ -79,6 +80,9 @@ class AddEditRewardViewModel @Inject constructor(
 
     private val showRewardIconSelectionDialogLiveData = savedStateHandle.getLiveData<Boolean>("showRewardIconSelectionDialogLiveData",false)
     val showRewardIconSelectionDialog:LiveData<Boolean> = showRewardIconSelectionDialogLiveData
+
+    private val showDeleteRewardConfirmationDialogLiveData = savedStateHandle.getLiveData<Boolean>("showDeleteRewardConfirmationDialogLiveData", false)
+    val showDeleteRewardConfirmationDialog: LiveData<Boolean> = showDeleteRewardConfirmationDialogLiveData
 
     init {
         if (rewardId != null && rewardId != NO_REWARD_ID){
@@ -141,6 +145,25 @@ class AddEditRewardViewModel @Inject constructor(
 
     }
 
+    override fun onDeleteClicked() {
+        showDeleteRewardConfirmationDialogLiveData.value = true
+    }
+
+    override fun onDeleteRewardConfirmed() {
+        showDeleteRewardConfirmationDialogLiveData.value = false
+        viewModelScope.launch {
+            val reward =  reward
+            if (reward!=null){
+                rewardDao.deleteReward(reward)
+                eventChannel.send(AddEditRewardEvent.RewardDeleted)
+            }
+        }
+    }
+
+    override fun onDeleteRewardDialogDismissed() {
+        showDeleteRewardConfirmationDialogLiveData.value = false
+    }
+
     private suspend fun createReward(reward: Reward) {
         rewardDao.insertReward(reward = reward)
         eventChannel.send(AddEditRewardEvent.RewardCreated)
@@ -160,3 +183,4 @@ const val NO_REWARD_ID = -1L
 const val ADD_EDIT_REWARD_RESULT = "ADD_EDIT_REWARD_RESULT"
 const val RESULT_REWARD_ADDED = "RESULT_REWARD_ADDED"
 const val RESULT_REWARD_UPDATED = "RESULT_REWARD_UPDATED"
+const val RESULT_REWARD_DELETED = "RESULT_REWARD_DELETED"
