@@ -5,6 +5,7 @@ import com.raystatic.incentivetimer.data.Reward
 import com.raystatic.incentivetimer.data.RewardDao
 import com.raystatic.incentivetimer.core.ui.IconKey
 import com.raystatic.incentivetimer.core.ui.defaultRrewardIcon
+import com.raystatic.incentivetimer.core.ui.screenSpecs.AddEditRewardScreenSpec
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -17,10 +18,6 @@ class AddEditRewardViewModel @Inject constructor(
     private val rewardDao: RewardDao
 ): ViewModel(), AddEditRewardActions {
 
-    private object SavedStateHandleKeys{
-        const val KEY_REWARD_LIVE_DATA = "KEY_REWARD_LIVE_DATA"
-    }
-
     sealed class AddEditRewardEvent{
         object RewardCreated: AddEditRewardEvent()
         object RewardUpdated: AddEditRewardEvent()
@@ -30,10 +27,10 @@ class AddEditRewardViewModel @Inject constructor(
     private val eventChannel = Channel<AddEditRewardEvent>()
     val events = eventChannel.receiveAsFlow()
 
-    private val rewardId = savedStateHandle.get<Long>(ARG_REWARD_ID)
-    private val rewardLiveData = savedStateHandle.getLiveData<Reward>(SavedStateHandleKeys.KEY_REWARD_LIVE_DATA)
+    private val rewardId = AddEditRewardScreenSpec.getRewardIdFromSavedStateHandle(savedStateHandle = savedStateHandle)
+    private val rewardLiveData = savedStateHandle.getLiveData<Reward>(KEY_REWARD_LIVE_DATA)
 
-    val isEditMode = rewardId != NO_REWARD_ID
+    val isEditMode = AddEditRewardScreenSpec.isEditMode(rewardId = rewardId)
 
     val rewardNameInput:LiveData<String> = rewardLiveData.map {
         it.title
@@ -45,7 +42,7 @@ class AddEditRewardViewModel @Inject constructor(
     val chanceInPercentInput :LiveData<Int> = rewardLiveData.map {
         it.chanceInPercent
     }
-
+ 
     val rewardIconSelection:LiveData<IconKey> = rewardLiveData.map {
         it.icon
     }
@@ -58,7 +55,7 @@ class AddEditRewardViewModel @Inject constructor(
 
     init {
 
-        if (!savedStateHandle.contains(SavedStateHandleKeys.KEY_REWARD_LIVE_DATA )){
+        if (!savedStateHandle.contains(KEY_REWARD_LIVE_DATA )){
             if (rewardId != null && isEditMode){
                 viewModelScope.launch {
                     rewardLiveData.value = rewardDao.getRewardById(rewardId)
@@ -138,6 +135,8 @@ class AddEditRewardViewModel @Inject constructor(
 
 }
 
+
+const val KEY_REWARD_LIVE_DATA = "KEY_REWARD_LIVE_DATA"
 
 const val ARG_REWARD_ID = "rewardId"
 const val NO_REWARD_ID = -1L

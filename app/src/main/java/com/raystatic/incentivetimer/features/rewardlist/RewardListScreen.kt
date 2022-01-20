@@ -26,13 +26,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.raystatic.incentivetimer.FullScreenDestinations
 import com.raystatic.incentivetimer.R
 import com.raystatic.incentivetimer.data.Reward
 import com.raystatic.incentivetimer.core.ui.IconKey
 import com.raystatic.incentivetimer.core.ui.ListBottomPadding
+import com.raystatic.incentivetimer.core.ui.screenSpecs.AddEditRewardScreenSpec
 import com.raystatic.incentivetimer.features.addeditreward.*
 import kotlinx.coroutines.launch
+
+
+@Composable
+fun RewardListTopAppBar() {
+    TopAppBar(
+        title = {
+            Text(stringResource(id = R.string.reward_list))
+        }
+    )
+}
 
 @Composable
 fun RewardListScreen(
@@ -75,10 +85,10 @@ fun RewardListScreen(
     ScreenContent(
         rewards = rewards,
         onAddRewardClicked = {
-            navController.navigate(FullScreenDestinations.AddEditRewardScreen.route)
+            navController.navigate(AddEditRewardScreenSpec.buildRoute())
         },
         onRewardItemClicked = {id->
-            navController.navigate(FullScreenDestinations.AddEditRewardScreen.route+"?$ARG_REWARD_ID=${id}")
+            navController.navigate(AddEditRewardScreenSpec.buildRoute(id))
         },
         scaffoldState = scaffoldState
     )
@@ -93,11 +103,6 @@ private fun ScreenContent(
 ) {
 
     Scaffold(
-        topBar = {
-            TopAppBar(title ={
-                Text(text = stringResource(id = R.string.reward_list))
-            })
-        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddRewardClicked,

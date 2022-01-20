@@ -14,6 +14,16 @@ import androidx.navigation.NavController
 import com.raystatic.incentivetimer.R
 import com.raystatic.incentivetimer.core.ui.theme.IncentiveTimerTheme
 
+
+@Composable
+fun TimerScreenTopAppBar() {
+    TopAppBar(
+        title = {
+            Text(stringResource(id = R.string.timer))
+        }
+    )
+}
+
 @Composable
 fun TimerScreen(
     navController: NavController
@@ -23,13 +33,7 @@ fun TimerScreen(
 
 @Composable
 private fun ScreenContent() {
-    Scaffold(
-        topBar = {
-            TopAppBar(title ={
-                Text(text = stringResource(id = R.string.timer))
-            })
-        }
-    ) {
+    Scaffold{
         Box(
             modifier = Modifier
                 .fillMaxSize(),

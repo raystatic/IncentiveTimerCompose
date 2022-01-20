@@ -42,6 +42,48 @@ interface AddEditRewardActions{
     fun onDeleteRewardDialogDismissed()
 }
 
+
+@Composable
+fun AddEditRewardTopAppBar(
+    isEditMode: Boolean,
+    onCloseClicked: () -> Unit,
+    actions: AddEditRewardActions
+) {
+    val appBarTitle = if (isEditMode) stringResource(id = R.string.edit_reward) else stringResource(id = R.string.add_reward)
+    TopAppBar(
+        title ={
+            Text(text = appBarTitle)
+        },
+        navigationIcon = {
+            IconButton(onClick = onCloseClicked) {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = stringResource(id = R.string.close)
+                )
+            }
+        },
+        actions = {
+            if (isEditMode){
+                var expanded by remember{ mutableStateOf(false) }
+                Box{
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.open_menu))
+                    }
+                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false}) {
+                        DropdownMenuItem(onClick = {
+                            expanded = false
+                            actions.onDeleteClicked()
+                        }) {
+                            Text(text = stringResource(id = R.string.delete_reward))
+                        }
+                    }
+                }
+
+            }
+        }
+    )
+}
+
 @Composable
 fun AddEditRewardScreen(
     navController: NavController
@@ -110,41 +152,6 @@ private fun ScreenContent(
     actions:AddEditRewardActions
 ) {
     Scaffold(
-        topBar = {
-            val appBarTitle = if (isEditMode) stringResource(id = R.string.edit_reward) else stringResource(id = R.string.add_reward)
-            TopAppBar(
-                title ={
-                    Text(text = appBarTitle)
-                },
-                navigationIcon = {
-                    IconButton(onClick = onCloseClicked) {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = stringResource(id = R.string.close)
-                        )
-                    }
-                },
-                actions = {
-                    if (isEditMode){
-                        var expanded by remember{ mutableStateOf(false) }
-                        Box{
-                            IconButton(onClick = { expanded = true }) {
-                                Icon(Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.open_menu))
-                            }
-                            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false}) {
-                                DropdownMenuItem(onClick = {
-                                    expanded = false
-                                    actions.onDeleteClicked()
-                                }) {
-                                    Text(text = stringResource(id = R.string.delete_reward))
-                                }
-                            }
-                        }
-
-                    }
-                }
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = actions::onSaveClicked,
